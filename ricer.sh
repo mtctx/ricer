@@ -6,6 +6,20 @@ exit_dir_on_error() {
     cd $HOME || true
 }
 
+clone() {
+    local repo="$1"
+    local out="$2"
+
+    rm -rf "$out"
+
+    git clone -- "$repo" "$out" || {
+        echo "Clone failed or incomplete" >&2
+        rm -rf -- "$out"
+        exit 1
+    }
+}
+
+
 trap exit_dir_on_error ERR
 
 echo """
@@ -21,9 +35,19 @@ echo """
     - Kvantum -> https://github.com/tsujan/Kvantum/tree/master/Kvantum & https://github.com/catppuccin/kvantum
     - Fish shell -> https://github.com/mtctx/rice/blob/main/config.fish
     - Fastfetch -> https://github.com/mtctx/rice/blob/main/fastfetch.jsonc
+
+    Requirements:
+    - KDE Plasma 6
+    - QT 5 and/or 6
 """
 
 sleep 1.25s
+
+if [ "${XDG_CURRENT_DESKTOP}" != "KDE" ] || ! plasmashell --version | grep -qE 'plasmashell 6\.'; then
+    echo "You need to use KDE 6, you can't run this script from a different DE (e.g. GNOME, COSMIC, ...)"
+    exit 1
+fi
+
 
 arch="ARCH"
 cachyos="CACHYOS"
@@ -76,11 +100,7 @@ if [[ $os == $cachyos ]]; then
 elif [[ $os == $arch || $force == "true" ]]; then
     echo "Building YAY manually"
     sudo pacman -S --needed git base-devel --noconfirm
-    git clone https://aur.archlinux.org/yay.git
-    if [ $? -ne 0 ]; then
-        echo "Clone failed or incomplete"
-        exit 1
-    fi
+    clone https://aur.archlinux.org/yay.git
     cd yay && makepkg -si
 fi
 
@@ -117,11 +137,7 @@ mkdir -p "$folder_path"
 cd "$folder_path"
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
-git clone https://github.com/mtctx/rice.git "$folder_path"
-if [ $? -ne 0 ]; then
-    echo "Clone failed or incomplete"
-    exit 1
-fi
+clone https://github.com/mtctx/rice.git "$folder_path"
 
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
@@ -134,11 +150,7 @@ sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
 # KDE
 echo "Downloading KDE Catppuccin Mocha Mauve theme..."
 sudo rm -rf "$cpmm_kde"
-git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
-if [ $? -ne 0 ]; then
-    echo "Clone failed or incomplete"
-    exit 1
-fi
+clone "https://github.com/catppuccin/kde.git", "$cpmm_kde"
 
 echo "Running KDE Catppuccin installer..."
 
@@ -154,9 +166,11 @@ sed -i '/You may want to run the following in your terminal if you notice any in
 N
 s|You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:\nln -s ~/.local/share/icons/ ~/.icons|NEW_TEXT_HERE|
 }' "$cpmm_kde/install.sh"
-echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
+cd "$cpmm_kde"
+echo -e "y\ny" | ./install.sh 1 4 1
 sudo rm -rf ~/.icons
 sudo ln -s ~/.local/share/icons/ ~/.icons
+cd ..
 
 # Kvantum
 echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
@@ -182,11 +196,7 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo mkdir -p /usr/share/sddm/themes/
     echo "Downloading Where is my SDDM theme?..."
     rm -rf "Where is my SDDM theme"
-    git clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
-    if [ $? -ne 0 ]; then
-        echo "Clone failed or incomplete"
-        exit 1
-    fi
+    clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
     echo "Installing Where is my SDDM theme..."
     read -p "Which QT Version are you using? 5 or 6: " qt_version
     qt_version=${qt_version:-"6"}
