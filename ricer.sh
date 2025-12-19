@@ -2,6 +2,12 @@
 
 set -e
 
+exit_dir_on_error() {
+    cd $HOME || true
+}
+
+trap exit_dir_on_error ERR
+
 echo """
     Welcome to Ricer by mtctx (https://github.com/mtctx/rice)
     This shell script is exclusively for Arch-based Distros.
@@ -102,15 +108,16 @@ fi
 
 sudo rm -rf "$folder_path"
 mkdir -p "$folder_path"
+cd "$folder_path"
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
 git clone https://github.com/mtctx/rice.git "$folder_path"
 
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
-cpmm_kde="$folder_path/$cpmm_prefix KDE"
-cpmm_kvantum="$folder_path/$cpmm_prefix Kvantum"
-cpmm_whereismysddmtheme="$folder_path/$cpmm_prefix Where is my SDDM theme.conf"
+cpmm_kde="$cpmm_prefix KDE"
+cpmm_kvantum="$cpmm_prefix Kvantum"
+cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
 
 sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
 
@@ -154,6 +161,7 @@ sudo ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo mkdir -p /usr/share/sddm/themes/
     echo "Downloading Where is my SDDM theme?..."
+    rm -rf "Where is my SDDM theme"
     git clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
     echo "Installing Where is my SDDM theme..."
     read -p "Which QT Version are you using? 5 or 6: " qt_version
