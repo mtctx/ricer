@@ -273,7 +273,6 @@ echo "Installing and applying Kvantum theme..."
 mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 kvantummanager --set catppuccin-mocha-mauve
-kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
 # Konsole
 sudo mkdir -p $HOME/.local/share/konsole/
