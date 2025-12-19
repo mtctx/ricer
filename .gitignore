@@ -1,0 +1,7 @@
+*
+!.gitignore
+!brave-policies.json
+!config.fish
+!fastfetch.jsonc
+!konsole-fish.profile
+!ricer.sh

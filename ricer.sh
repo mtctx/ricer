@@ -120,6 +120,7 @@ rm -rf "$cpmm_kde"
 git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
 echo "Running KDE Catppuccin installer..."
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
+rm -rf ~/.icons
 ln -s ~/.local/share/icons/ ~/.icons
 
 # Kvantum
