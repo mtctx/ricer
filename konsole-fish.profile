@@ -3,7 +3,7 @@ ColorScheme=catppuccin-mocha
 
 [General]
 Command=/bin/fish
-Name="Fish Shell"
+Name=Fish
 Parent=FALLBACK/
 
 [Scrolling]
