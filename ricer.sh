@@ -262,6 +262,29 @@ sudo rm -rf $HOME/.icons
 ln -sf $HOME/.local/share/icons/ $HOME/.icons
 cd ..
 
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "8" --group "General" --key "extraItems" "org.kde.kdeconnect,org.kde.plasma.cameraindicator,org.kde.plasma.clipboard,org.kde.plasma.manage-inputmethod,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.weather"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "8" --group "General" --key "hiddenItems" "Arch-Update"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "8" --group "General" --key "knownItems" "org.kde.plasma.bluetooth,org.kde.kdeconnect,org.kde.plasma.cameraindicator,org.kde.plasma.clipboard,org.kde.plasma.manage-inputmethod,org.kde.plasma.keyboardlayout,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.notifications,org.kde.kscreen,org.kde.plasma.battery,org.kde.plasma.brightness,org.kde.plasma.networkmanagement,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.weather"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "8" --group "General" --key "scaleIconsToFit" "true"
+
+MAX_ID=$(grep -oP '\[Containments\]\[3\]\[Applets\]\[\K\d+' ~/.config/plasma-org.kde.plasma.desktop-appletsrc | sort -n | tail -1)
+MAX_ID=$((MAX_ID + 1))
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "$MAX_ID" --key "immutability" "1"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "$MAX_ID" --key "plugin" "org.kde.plasma.panelspacer"
+MAX_ID=$((MAX_ID + 1))
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "$MAX_ID" --key "immutability" "1"
+kwriteconfig6 --file plasma-org.kde.plasma.desktop-appletsrc --group "Containments" --group "3" --group "Applets" --group "$MAX_ID" --key "plugin" "org.kde.plasma.panelspacer"
+
+icontasks_id=$(grep -B 2 "plugin=org.kde.plasma.icontasks" ~/.config/plasma-org.kde.plasma.desktop-appletsrc | grep "\[Containments\]\[3\]\[Applets\]"| sed 's/.*\[\([0-9]*\)\]$/\1/')
+current_order=$(kreadconfig6 --file "$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc" --group "Containments" --group "3" --group "General" --key "AppletOrder")
+new_order=$(echo "$current_order" | sed "s/\b$icontasks_id\b/$((MAX_ID - 1));$icontasks_id;$MAX_ID/g")
+kwriteconfig6 --file "$HOME/.config/plasma-org.kde.plasma.desktop-appletsrc" --group "Containments" --group "3" --group "General" --key "AppletOrder" "$new_order"
+
+unset MAX_ID
+unset icontasks_id
+unset current_order
+unset new_order
+
 # Kvantum
 echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
 sudo rm -rf "$cpmm_kvantum"
