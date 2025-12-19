@@ -92,7 +92,7 @@ yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_
 
 # Setup folder
 
-folder_path="~/Rice"
+folder_path="~/rice"
 read -p "Enter the path to your desired folder (Default: $folder_path): " input_path
 folder_path=${input_path:-"$folder_path"}
 
@@ -119,6 +119,14 @@ echo "Downloading KDE Catppuccin Mocha Mauve theme..."
 rm -rf "$cpmm_kde"
 git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
 echo "Running KDE Catppuccin installer..."
+
+rm -rf /home/me/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
+rm -rf /home/me/.local/share/plasma/look-and-feel
+rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents
+rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents/previews
+rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
+rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
+
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
 rm -rf ~/.icons
 ln -s ~/.local/share/icons/ ~/.icons
