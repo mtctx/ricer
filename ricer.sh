@@ -277,7 +277,7 @@ kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
 # Konsole
 sudo mkdir -p ~/.local/share/konsole/
-curl -LO -o konsole-catppuccin-mocha.colorscheme https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
+curl -Lo konsole-catppuccin-mocha.colorscheme https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
 sudo ln -sf "$rice_directory/konsole-catppuccin-mocha.colorscheme" ~/.local/share/konsole/catppuccin-mocha.colorscheme
 sudo ln -sf "$rice_directory/konsole-fish.profile" ~/.local/share/konsole/fish.profile
 
@@ -292,7 +292,7 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo "Where is my SDDM theme/install.sh" current
 
     echo "Downloading Where is my SDDM theme? Catppuccin Mocha Mauve theme..."
-    curl -LO -o "$cpmm_whereismysddmtheme" https://raw.githubusercontent.com/catppuccin/where-is-my-sddm-theme/refs/heads/main/themes/catppuccin-mocha.conf
+    curl -Lo "$cpmm_whereismysddmtheme" https://raw.githubusercontent.com/catppuccin/where-is-my-sddm-theme/refs/heads/main/themes/catppuccin-mocha.conf
 
     sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
     sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
