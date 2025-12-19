@@ -2,31 +2,47 @@
 
 set -e
 
-# Donwload Programs (Arch only)
-echo "Downloading Programs (Using sudo pacman -> Arch only)"
+echo """
+    Welcome to Ricer by mtctx (https://github.com/mtctx/rice)
+    This shell script is e
+"""
 
 arch="ARCH"
 cachyos="CACHYOS"
-declare os
 
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    case "$ID" in
-        arch)
-            os="$arch"
-            echo "Using Vanilla Arch"
-            ;;
-        cachyos)
-            os="$cachyos"
-            ;;
-        *)
-            echo "This is neither Arch nor CachyOS (ID: $ID)"
-            exit 1
-            ;;
+force=false
+
+for arg in "$@"; do
+    case $arg in
+        -f|--force)
+            echo "Force flag detected, will skip the os check!"
+            force="true"
+        ;;
+        *) ;;
     esac
-else
-    echo "/etc/os-release not found – unable to detect distribution!"
-    exit 1
+done
+
+declare os
+if [[ $force == "false" ]]; then
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        case "$ID" in
+            arch)
+                os="$arch"
+                echo "Using Vanilla Arch"
+                ;;
+            cachyos)
+                os="$cachyos"
+                ;;
+            *)
+                echo "This is neither Arch nor CachyOS (ID: $ID)"
+                exit 1
+                ;;
+        esac
+    else
+        echo "/etc/os-release not found – unable to detect distribution!"
+        exit 1
+    fi
 fi
 
 sudo -v
@@ -36,12 +52,12 @@ echo "Updating system..."
 sudo pacman -Syyu --noconfirm
 
 # YAY Setup
-if [[ $os == $arch ]]; then
-    echo "Building YAY manually"
-    sudo pacman -S --needed git base-devel --noconfirm && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
-elif [[ $os == $cachyos ]]; then
+if [[ $os == $cachyos ]]; then
     echo "Installing YAY via CachyOS AUR"
     sudo pacman -S --needed git base-devel yay --noconfirm
+elif [[ $os == $arch || $force == "true" ]]; then
+    echo "Building YAY manually"
+    sudo pacman -S --needed git base-devel --noconfirm && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 fi
 
 # Install packages
@@ -60,7 +76,7 @@ else
 fi
 
 echo "Installing packages..."
-yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_package ark awesome-terminal-fonts base bluez-hid2hci bluez-utils brave-bin btop btrfs-assistant cantarell-fonts cpupower dmraid dolphin duf efibootmgr efitools ethtool fastfetch ffmpegthumbnailer fisher fsarchiver glances gwenview haruna haveged hdparm hwdetect hwinfo inetutils jfsutils kate kcalc kde-gtk-config kdeplasma-addons kleopatra kvantum  kwallet-pam libgsf libva-nvidia-driver  libwnck3 linux-cachyos-headers linux-cachyos-nvidia-open logrotate lsscsi man-pages meld mtools mullvad-vpn nano-syntax-highlighting netctl networkmanager-openvpn nfs-utils noto-color-emoji-fontconfig ntp octopi pavucontrol plasma-browser-integration plasma-firewall plasma-systemmonitor plasma-thunderbolt poppler-glib prismlauncher pv qt6-wayland rebuild-detector reflector sddm-kcm sg3_utils sof-firmware spectacle systemd-boot-manager ttf-jetbrains-mono-nerd ttf-meslo-nerd ttf-opensans vi vlc-plugins-all xl2tpd xorg-xinit xorg-xinput xorg-xkill zip zoxide unzip
+yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_package ark awesome-terminal-fonts base bluez-hid2hci bluez-utils brave-bin btop btrfs-assistant cantarell-fonts cpupower dmraid dolphin duf efibootmgr efitools ethtool fastfetch ffmpegthumbnailer fisher fsarchiver glances gwenview haruna haveged hdparm hwdetect hwinfo inetutils jfsutils kate kcalc kde-gtk-config kdeplasma-addons kleopatra kvantum  kwallet-pam libgsf libva-nvidia-driver  libwnck3 logrotate lsscsi man-pages meld mtools mullvad-vpn nano-syntax-highlighting netctl networkmanager-openvpn nfs-utils noto-color-emoji-fontconfig ntp octopi pavucontrol plasma-browser-integration plasma-firewall plasma-systemmonitor plasma-thunderbolt poppler-glib prismlauncher pv qt6-wayland rebuild-detector reflector sddm-kcm sg3_utils sof-firmware spectacle systemd-boot-manager ttf-jetbrains-mono-nerd ttf-meslo-nerd ttf-opensans vi vlc-plugins-all xl2tpd xorg-xinit xorg-xinput xorg-xkill zip zoxide unzip
 
 # Setup folder
 
