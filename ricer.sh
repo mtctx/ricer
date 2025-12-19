@@ -96,7 +96,7 @@ sleep 1.25s
 arch="ARCH"
 cachyos="CACHYOS"
 
-rice_directory="~/rice"
+rice_directory="$HOME/rice"
 skip_os_check=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -219,7 +219,7 @@ yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_
 
 # Setup folder
 if [[ $rice_directory == ~* ]]; then
-    rice_directory="${rice_directory/#\~/$HOME}"
+    rice_directory="${rice_directory/#\$HOME/$HOME}"
 fi
 
 sudo rm -rf "$rice_directory"
@@ -254,12 +254,12 @@ sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
 sed -i "s/clear//g" "$cpmm_kde/install.sh"
 sed -i '/You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:/{
 N
-s|You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:\nln -s ~/.local/share/icons/ ~/.icons|NEW_TEXT_HERE|
+s|You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:\nln -s $HOME/.local/share/icons/ $HOME/.icons|NEW_TEXT_HERE|
 }' "$cpmm_kde/install.sh"
 cd "$cpmm_kde"
 echo -e "y\ny" | ./install.sh 1 4 1
-sudo rm -rf ~/.icons
-sudo ln -sf ~/.local/share/icons/ ~/.icons
+sudo rm -rf $HOME/.icons
+ln -sf $HOME/.local/share/icons/ $HOME/.icons
 cd ..
 
 # Kvantum
@@ -271,21 +271,23 @@ curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://github.com/
 
 echo "Installing and applying Kvantum theme..."
 mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
-sudo ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 kvantummanager --set catppuccin-mocha-mauve
 kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
 # Konsole
-sudo mkdir -p ~/.local/share/konsole/
+sudo mkdir -p $HOME/.local/share/konsole/
 curl -Lo konsole-catppuccin-mocha.colorscheme https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
-sudo ln -sf "$rice_directory/konsole-catppuccin-mocha.colorscheme" ~/.local/share/konsole/catppuccin-mocha.colorscheme
-sudo ln -sf "$rice_directory/konsole-fish.profile" ~/.local/share/konsole/fish.profile
+ln -sf "$rice_directory/konsole-catppuccin-mocha.colorscheme" $HOME/.local/share/konsole/catppuccin-mocha.colorscheme
+ln -sf "$rice_directory/konsole-fish.profile" $HOME/.local/share/konsole/fish.profile
 
 # SDDM & Where is my SDDM theme? Setup
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo mkdir -p /usr/share/sddm/themes/
-    echo "Downloading Where is my SDDM theme?..."
     rm -rf "Where is my SDDM theme"
+    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/
+
+    echo "Downloading Where is my SDDM theme?..."
     clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme" true
 
     echo "Installing Where is my SDDM theme?..."
@@ -296,12 +298,12 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
 
     sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
     sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
-    sudo rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    sudo rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    sudo rm -rf $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo rm -rf $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
 
     echo "Symlinking the theme to sddm theme directories..."
-    sudo ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    sudo ln -sf "$cpmm_whereismysddmtheme" ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    ln -sf "$cpmm_whereismysddmtheme" $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
 else
     echo "SDDM is not installed or inactive -> Skipping Where is my SDDM theme? setup!"
 fi
@@ -318,11 +320,11 @@ if ! sudo chsh "$USER" -s /usr/bin/fish; then
 fi
 
 echo "Copying fish config"
-sudo mkdir -p ~/.config/fish/
-sudo rm -rf ~/.config/fish/functions/
-sudo rm -rf ~/.config/fish/conf.d/gitnow.fish
-sudo rm -rf ~/.config/fish/config.fish
-sudo ln -sf "$rice_directory/config.fish" ~/.config/fish/config.fish
+sudo mkdir -p $HOME/.config/fish/
+sudo rm -rf $HOME/.config/fish/functions/
+sudo rm -rf $HOME/.config/fish/conf.d/gitnow.fish
+sudo rm -rf $HOME/.config/fish/config.fish
+ln -sf "$rice_directory/config.fish" $HOME/.config/fish/config.fish
 
 echo "Installing fisher and plugins"
 /usr/bin/fish -c '
@@ -342,9 +344,9 @@ echo "Installing fisher and plugins"
 
 # Fastfetch
 echo "Copying Fastfetch config"
-sudo mkdir -p ~/.config/fastfetch/
-sudo rm -rf ~/.config/fastfetch/config.jsonc
-sudo ln -sf "$rice_directory/fastfetch.jsonc" ~/.config/fastfetch/config.jsonc
+sudo mkdir -p $HOME/.config/fastfetch/
+sudo rm -rf $HOME/.config/fastfetch/config.jsonc
+ln -sf "$rice_directory/fastfetch.jsonc" $HOME/.config/fastfetch/config.jsonc
 
 # Brave Setup
 echo "Copying Brave policies"
