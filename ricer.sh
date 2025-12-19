@@ -227,7 +227,7 @@ echo "Installing fisher and plugins"
     fisher install reitzig/sdkman-for-fish
     fisher install jorgebucaran/autopair.fish
     fisher install patrickf1/fzf.fish
-    fisher install joseluisq/gitnow.fish
+    fisher install joseluisq/gitnow
 '
 
 # Fastfetch
