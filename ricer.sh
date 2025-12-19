@@ -150,7 +150,10 @@ sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
 sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
 
 sed -i "s/clear//g" "$cpmm_kde/install.sh"
-
+sed -i '/You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:/{
+N
+s|You may want to run the following in your terminal if you notice any inconsistencies for the cursor theme:\nln -s ~/.local/share/icons/ ~/.icons|NEW_TEXT_HERE|
+}' "$cpmm_kde/install.sh"
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
 sudo rm -rf ~/.icons
 sudo ln -s ~/.local/share/icons/ ~/.icons
