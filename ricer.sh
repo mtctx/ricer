@@ -190,9 +190,13 @@ else
 fi
 
 # Fish
+sudo chsh $USER /bin/fish
+
 sudo mkdir -p ~/.config/fish/
 sudo rm -rf ~/.config/fish/config.fish
 sudo ln -sf config.fish ~/.config/fish/config.fish
+
+fish
 
 fisher install catppuccin/fish
 fisher install reitzig/sdkman-for-fish
