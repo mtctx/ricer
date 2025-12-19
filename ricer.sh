@@ -134,6 +134,8 @@ sudo rm -rf $HOME/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/conte
 sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
 sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
 
+sed -i "s/clear//g" "$cpmm_kde/install.sh"
+
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
 sudo rm -rf ~/.icons
 sudo ln -s ~/.local/share/icons/ ~/.icons
