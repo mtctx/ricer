@@ -6,11 +6,18 @@ exit_dir_on_error() {
     cd $HOME || true
 }
 
+trap exit_dir_on_error ERR
+
 clone() {
     local repo="$1"
     local out="$2"
+    local remove="$3"
 
-    rm -rf "$out"
+    remove=${remove:-false}
+
+    if [[ $remove == true ]]; then
+        rm -rf "$out"
+    fi
 
     git clone -- "$repo" "$out" || {
         echo "Clone failed or incomplete" >&2
@@ -19,53 +26,139 @@ clone() {
     }
 }
 
+check_kde_version() {
+    if [[ $(plasmashell --version 2>/dev/null | cut -d' ' -f2 | cut -d. -f1) != 6 ]]; then
+        echo "Not KDE Plasma 6." >&2
+        exit 1
+    fi
+}
 
-trap exit_dir_on_error ERR
+check_kde_installed() {
+    if ! command -v plasmashell >/dev/null 2>&1; then
+        echo "KDE Plasma not installed." >&2
+        check_kde_version
+        exit 1
+    fi
+}
 
-echo """
+trim_indent() {
+    local line min_indent=999999 indent content
+    local -a lines=()
+
+    # Read all lines into an array
+    while IFS= read -r line; do
+        lines+=("$line")
+    done
+
+    # Find minimum indent (ignore blank lines)
+    for line in "${lines[@]}"; do
+        if [[ $line =~ ^([[:space:]]*)(.*)$ ]]; then
+            content=${BASH_REMATCH[2]}
+            indent=${#BASH_REMATCH[1]}
+            # Only consider non-blank lines
+            [[ -n $content ]] && (( indent < min_indent )) && min_indent=$indent
+        fi
+    done
+
+    # If no indent found, just output as-is
+    (( min_indent == 999999 )) && min_indent=0
+
+    # Output each line with min_indent removed
+    for line in "${lines[@]}"; do
+        printf '%s\n' "${line:min_indent}"
+    done
+}
+
+trim_indent <<EOF
     Welcome to Ricer by mtctx (https://github.com/mtctx/rice)
     This shell script is exclusively for Arch-based Distros.
     Officially supported are CachyOS and Vanilla Arch.
-    If you are on a different Arch-based Distro run this script with -f or --force.
+    If you are on a different Arch-based Distro run this script with --trustmeiamonarch.
 
     Ricer will setup your KDE enviroment to use Catppuccin Mocha Mauve everywhere.
     What will Ricer setup?
     - KDE -> https://github.com/catppuccin/kde
     - Konsole -> https://github.com/catppuccin/konsole & https://github.com/mtctx/rice/blob/main/konsole-fish.profile
     - Kvantum -> https://github.com/tsujan/Kvantum/tree/master/Kvantum & https://github.com/catppuccin/kvantum
-    - Fish shell -> https://github.com/mtctx/rice/blob/main/config.fish
+    - Fish shell -> https://github.com/catppuccin/fish & https://github.com/mtctx/rice/blob/main/config.fish & https://github.com/jorgebucaran/fisher
     - Fastfetch -> https://github.com/mtctx/rice/blob/main/fastfetch.jsonc
 
     Requirements:
     - KDE Plasma 6
     - QT 5 and/or 6
-"""
+EOF
+
+check_kde_installed
+check_kde_version
 
 sleep 1.25s
-
-if [ "${XDG_CURRENT_DESKTOP}" != "KDE" ] || ! plasmashell --version | grep -qE 'plasmashell 6\.'; then
-    echo "You need to use KDE 6, you can't run this script from a different DE (e.g. GNOME, COSMIC, ...)"
-    exit 1
-fi
-
 
 arch="ARCH"
 cachyos="CACHYOS"
 
-force=false
-
-for arg in "$@"; do
-    case $arg in
-        -f|--force)
-            echo "Force flag detected, will skip the os check!"
-            force="true"
+rice_directory="~/rice"
+skip_os_check=false
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dir)
+            rice_directory="$2"
+            shift
         ;;
-        *) ;;
+        --qt)
+            if [[ -n "$2" && "$2" != -* ]]; then
+                case "$2" in
+                    "5")
+                        export USE_QT5="true"
+                    ;;
+                    "6")
+                    ;;
+                    *)
+                        echo "Defaulting to QT 6 for Where is my SDDM theme?."
+                        echo "Version $2 is invalid. Accepted options: 5, 6"
+                    ;;
+                esac
+                shift
+            else
+                echo "Error: --qt requires a value" >&2
+                exit 1
+            fi
+        ;;
+        --trustmeiamonarch)
+            skip_os_check=true
+            shift
+        ;;
+        -h|--help) 
+            trim_indent <<EOF
+                Usage: $0 [--dir PATH_TO_DIR] [--qt 5|6] [--trustmeiamonarch]
+                
+                Options:
+                --dir: Set the directory to save all configs.
+                --qt: Set the QT Version, either 5 or 6. Malformed input will default to QT 6
+                --trustmeiamonarch: Skip the OS check (Use if you are on an different Arch-based distro and not on vanilla Arch or CachyOS)
+EOF
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 1
+            ;;
     esac
+    shift
 done
 
+echo
+echo "Storing all configs inside $rice_directory"
+
+if [[ $USE_QT5 == "true" ]]; then
+    echo "Using QT 5 for Where is my SDDM theme?."
+else
+    echo "Using QT 6 for Where is my SDDM theme?."
+fi
+
+echo
+
 declare os
-if [[ $force == "false" ]]; then
+if [[ $skip_os_check == false ]]; then
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         case "$ID" in
@@ -85,6 +178,8 @@ if [[ $force == "false" ]]; then
         echo "/etc/os-release not found – unable to detect distribution!"
         exit 1
     fi
+else
+    echo "Trust me flag detected, will skip the os check!"
 fi
 
 sudo -v
@@ -97,10 +192,10 @@ sudo pacman -Syyu --noconfirm
 if [[ $os == $cachyos ]]; then
     echo "Installing YAY via CachyOS AUR"
     sudo pacman -S --needed git base-devel yay --noconfirm
-elif [[ $os == $arch || $force == "true" ]]; then
+elif [[ $os == $arch || $skip_os_check == true ]]; then
     echo "Building YAY manually"
     sudo pacman -S --needed git base-devel --noconfirm
-    clone https://aur.archlinux.org/yay.git
+    clone https://aur.archlinux.org/yay.git true
     cd yay && makepkg -si
 fi
 
@@ -120,24 +215,19 @@ else
 fi
 
 echo "Installing packages..."
-yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_package ark awesome-terminal-fonts base bluez-hid2hci bluez-utils brave-bin btop btrfs-assistant cantarell-fonts cpupower dmraid dolphin duf efibootmgr efitools ethtool fastfetch ffmpegthumbnailer fisher fsarchiver glances gwenview haruna haveged hdparm hwdetect hwinfo inetutils jfsutils kate kcalc kde-gtk-config kdeplasma-addons kleopatra kvantum  kwallet-pam libgsf libva-nvidia-driver  libwnck3 logrotate lsscsi man-pages meld mtools mullvad-vpn nano-syntax-highlighting netctl networkmanager-openvpn nfs-utils noto-color-emoji-fontconfig ntp octopi pavucontrol plasma-browser-integration plasma-firewall plasma-systemmonitor plasma-thunderbolt poppler-glib prismlauncher pv qt6-wayland rebuild-detector reflector sddm-kcm sg3_utils sof-firmware spectacle systemd-boot-manager ttf-jetbrains-mono-nerd ttf-meslo-nerd ttf-opensans vi vlc-plugins-all xl2tpd xorg-xinit xorg-xinput xorg-xkill zip zoxide unzip
+yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_package ark awesome-terminal-fonts base bluez-hid2hci bluez-utils brave-bin btop btrfs-assistant cantarell-fonts cpupower dmraid dolphin duf efibootmgr efitools ethtool fastfetch ffmpegthumbnailer fisher fsarchiver glances gwenview haruna haveged hdparm hwdetect hwinfo inetutils jfsutils kate kcalc kde-gtk-config kdeplasma-addons kleopatra kvantum  kwallet-pam libgsf libva-nvidia-driver  libwnck3 logrotate lsscsi man-pages meld mtools mullvad-vpn nano-syntax-highlighting netctl networkmanager-openvpn nfs-utils noto-color-emoji-fontconfig ntp octopi pavucontrol plasma-browser-integration plasma-firewall plasma-systemmonitor plasma-thunderbolt poppler-glib prismlauncher pv qt$([[ $USE_QT5 == "true" ]] && echo 5 || echo 6)-wayland rebuild-detector reflector sddm-kcm sg3_utils sof-firmware spectacle systemd-boot-manager ttf-jetbrains-mono-nerd ttf-meslo-nerd ttf-opensans vi vlc-plugins-all xl2tpd xorg-xinit xorg-xinput xorg-xkill zip zoxide unzip
 
 # Setup folder
-
-folder_path="~/rice"
-read -p "Enter the path to your desired folder (Default: $folder_path): " input_path
-folder_path=${input_path:-"$folder_path"}
-
-if [[ $folder_path == ~* ]]; then
-    folder_path="${folder_path/#\~/$HOME}"
+if [[ $rice_directory == ~* ]]; then
+    rice_directory="${rice_directory/#\~/$HOME}"
 fi
 
-sudo rm -rf "$folder_path"
-mkdir -p "$folder_path"
-cd "$folder_path"
+sudo rm -rf "$rice_directory"
+mkdir -p "$rice_directory"
+cd "$rice_directory"
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
-clone https://github.com/mtctx/rice.git "$folder_path"
+clone https://github.com/mtctx/rice.git "$rice_directory"
 
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
@@ -145,12 +235,12 @@ cpmm_kde="$cpmm_prefix KDE"
 cpmm_kvantum="$cpmm_prefix Kvantum"
 cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
 
-sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
+sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve"
 
 # KDE
 echo "Downloading KDE Catppuccin Mocha Mauve theme..."
 sudo rm -rf "$cpmm_kde"
-clone "https://github.com/catppuccin/kde.git", "$cpmm_kde"
+clone "https://github.com/catppuccin/kde.git" "$cpmm_kde" true
 
 echo "Running KDE Catppuccin installer..."
 
@@ -169,7 +259,7 @@ s|You may want to run the following in your terminal if you notice any inconsist
 cd "$cpmm_kde"
 echo -e "y\ny" | ./install.sh 1 4 1
 sudo rm -rf ~/.icons
-sudo ln -s ~/.local/share/icons/ ~/.icons
+sudo ln -sf ~/.local/share/icons/ ~/.icons
 cd ..
 
 # Kvantum
@@ -188,33 +278,17 @@ kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 # Konsole
 sudo mkdir -p ~/.local/share/konsole/
 curl -LO -o konsole-catppuccin-mocha.colorscheme https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
-sudo ln -sf konsole-catppuccin-mocha.colorscheme ~/.local/share/konsole/catppuccin-mocha.colorscheme
-sudo ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
+sudo ln -sf "$rice_directory/konsole-catppuccin-mocha.colorscheme" ~/.local/share/konsole/catppuccin-mocha.colorscheme
+sudo ln -sf "$rice_directory/konsole-fish.profile" ~/.local/share/konsole/fish.profile
 
 # SDDM & Where is my SDDM theme? Setup
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo mkdir -p /usr/share/sddm/themes/
     echo "Downloading Where is my SDDM theme?..."
     rm -rf "Where is my SDDM theme"
-    clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
-    echo "Installing Where is my SDDM theme..."
-    read -p "Which QT Version are you using? 5 or 6: " qt_version
-    qt_version=${qt_version:-"6"}
-    case "$qt_version" in
-        5)
-            export USE_QT5=true
-            echo "Using QT5 version of Where is my SDDM theme?..."
-            ;;
-        6)
-            unset USE_QT5
-            echo "Using QT6 version of Where is my SDDM theme?..."
-            ;;
-        *)
-            echo "Malformed input, defaulting to QT6"
-            qt_version="6"
-            ;;
-    esac
+    clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme" true
 
+    echo "Installing Where is my SDDM theme?..."
     sudo "Where is my SDDM theme/install.sh" current
 
     echo "Downloading Where is my SDDM theme? Catppuccin Mocha Mauve theme..."
@@ -245,38 +319,43 @@ fi
 
 echo "Copying fish config"
 sudo mkdir -p ~/.config/fish/
+sudo rm -rf ~/.config/fish/functions/
+sudo rm -rf ~/.config/fish/conf.d/gitnow.fish
 sudo rm -rf ~/.config/fish/config.fish
-sudo ln -sf config.fish ~/.config/fish/config.fish
+sudo ln -sf "$rice_directory/config.fish" ~/.config/fish/config.fish
 
 echo "Installing fisher and plugins"
 /usr/bin/fish -c '
     # Install fisher if not present
-    if not type -q fisher
-        curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
-        fisher install jorgebucaran/fisher
-    end
+    yay -S --needed --noconfirm fisher
 
-    # Install your plugins
+    # Install plugins
     fisher install catppuccin/fish
     fisher install reitzig/sdkman-for-fish
     fisher install jorgebucaran/autopair.fish
     fisher install patrickf1/fzf.fish
     fisher install joseluisq/gitnow
+
+    # Set theme
+    fish_config theme save "Catppuccin Mocha"
 '
 
 # Fastfetch
 echo "Copying Fastfetch config"
 sudo mkdir -p ~/.config/fastfetch/
 sudo rm -rf ~/.config/fastfetch/config.jsonc
-sudo ln -sf fastfetch.jsonc ~/.config/fastfetch/config.jsonc
+sudo ln -sf "$rice_directory/fastfetch.jsonc" ~/.config/fastfetch/config.jsonc
 
 # Brave Setup
 echo "Copying Brave policies"
 sudo mkdir -p /etc/brave/policies/managed/
 sudo rm -rf /etc/brave/policies/managed/policies.json
-sudo ln -sf brave-policies.json /etc/brave/policies/managed/policies.json
+sudo ln -sf "$rice_directory/brave-policies.json" /etc/brave/policies/managed/policies.json
 
-echo "Done setting up the rice.\nNote: This script cannot setup brave, discord, or the rest of applications and system settings used."
+echo "Done setting up the rice."
+echo "Note: This script cannot setup brave, discord, or the rest of applications and system settings used."
+
+echo
 echo "Updating the system a last time."
 
 declare reboot_after_update
@@ -284,11 +363,11 @@ while true; do
     read -p "Do you want to reboot after the update? [y/N]: " input_reboot_after_update
     case "${input_reboot_after_update:-N}" in
         [Yy]* )
-            reboot_after_update="true"
+            reboot_after_update=true
             break
         ;;
         [Nn]* )
-            reboot_after_update="false"
+            reboot_after_update=false
             echo "You need to logout or reboot for everything to apply correctly!"
             break
         ;;
@@ -298,7 +377,7 @@ while true; do
     esac
 done
 
-if [[ $reboot_after_update == "true" ]]; then
+if [[ $reboot_after_update == true ]]; then
     yay -Syyu --noconfirm && reboot
 else
     yay -Syyu --noconfirm
