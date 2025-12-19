@@ -75,7 +75,13 @@ if [[ $os == $cachyos ]]; then
     sudo pacman -S --needed git base-devel yay --noconfirm
 elif [[ $os == $arch || $force == "true" ]]; then
     echo "Building YAY manually"
-    sudo pacman -S --needed git base-devel --noconfirm && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+    sudo pacman -S --needed git base-devel --noconfirm
+    git clone https://aur.archlinux.org/yay.git
+    if [ $? -ne 0 ]; then
+        echo "Clone failed or incomplete"
+        exit 1
+    fi
+    cd yay && makepkg -si
 fi
 
 # Install packages
@@ -112,6 +118,10 @@ cd "$folder_path"
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
 git clone https://github.com/mtctx/rice.git "$folder_path"
+if [ $? -ne 0 ]; then
+    echo "Clone failed or incomplete"
+    exit 1
+fi
 
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
@@ -125,6 +135,11 @@ sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
 echo "Downloading KDE Catppuccin Mocha Mauve theme..."
 sudo rm -rf "$cpmm_kde"
 git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
+if [ $? -ne 0 ]; then
+    echo "Clone failed or incomplete"
+    exit 1
+fi
+
 echo "Running KDE Catppuccin installer..."
 
 sudo rm -rf $HOME/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
@@ -165,6 +180,10 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     echo "Downloading Where is my SDDM theme?..."
     rm -rf "Where is my SDDM theme"
     git clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
+    if [ $? -ne 0 ]; then
+        echo "Clone failed or incomplete"
+        exit 1
+    fi
     echo "Installing Where is my SDDM theme..."
     read -p "Which QT Version are you using? 5 or 6: " qt_version
     qt_version=${qt_version:-"6"}
