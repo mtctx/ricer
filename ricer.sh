@@ -191,6 +191,7 @@ else
 fi
 
 # Fish
+# Changing default shell to fish
 if ! sudo chsh "$USER" -s /usr/bin/fish; then
     if grep -q "^$USER:" /etc/passwd | grep -q "/usr/bin/fish$"; then
         echo "Shell is already set to Fish – continuing."
@@ -200,24 +201,32 @@ if ! sudo chsh "$USER" -s /usr/bin/fish; then
     fi
 fi
 
+echo "Copying fish config"
 sudo mkdir -p ~/.config/fish/
 sudo rm -rf ~/.config/fish/config.fish
 sudo ln -sf config.fish ~/.config/fish/config.fish
 
+echo "Starting fish"
 fish
 
+echo "Installing plugins via fisher"
 fisher install catppuccin/fish
 fisher install reitzig/sdkman-for-fish
 fisher install jorgebucaran/autopair.fish
 fisher install patrickf1/fzf.fish
 fisher install joseluisq/gitnow
 
+echo "Exiting fish"
+exit
+
 # Fastfetch
+echo "Copying Fastfetch config"
 sudo mkdir -p ~/.config/fastfetch/
 sudo rm -rf ~/.config/fastfetch/config.jsonc
 sudo ln -sf fastfetch.jsonc ~/.config/fastfetch/config.jsonc
 
 # Brave Setup
+echo "Copying Brave policies"
 sudo mkdir -p /etc/brave/policies/managed/
 sudo rm -rf /etc/brave/policies/managed/policies.json
 sudo ln -sf brave-policies.json /etc/brave/policies/managed/policies.json
