@@ -190,7 +190,7 @@ else
 fi
 
 # Fish
-sudo chsh $USER /bin/fish
+sudo chsh $USER -s /bin/fish
 
 sudo mkdir -p ~/.config/fish/
 sudo rm -rf ~/.config/fish/config.fish
