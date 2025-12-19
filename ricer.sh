@@ -290,6 +290,7 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     latest_tag=$(curl -s https://api.github.com/repos/catppuccin/sddm/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
     curl -Lo "$cpmm_sddm.zip" "https://github.com/catppuccin/sddm/releases/download/$latest_tag/catppuccin-mocha-mauve-sddm.zip"
     unzip "$cpmm_sddm.zip"
+    rm -rf "/usr/share/sddm/themes/catppuccin-mocha-mauve"
     sudo mv -v catppuccin-mocha-mauve /usr/share/sddm/themes
     rm -rf "$cpmm_sddm.zip"
 
