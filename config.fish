@@ -1,5 +1,3 @@
-# ~/.config/fish/config.fish
-# ----------------------------------
 # Hide default Fish welcome message
 set -U fish_greeting ""
 

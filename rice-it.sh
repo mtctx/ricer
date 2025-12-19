@@ -72,6 +72,7 @@ if [[ $folder_path == ~* ]]; then
     folder_path="${folder_path/#\~/$HOME}"
 fi
 
+rm -rf $folder_path
 mkdir -p $folder_path && cd $folder_path
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
@@ -96,7 +97,7 @@ ln -s ~/.local/share/icons/ ~/.icons
 # Kvantum
 echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
 rm -rf "$cpmm_kvantum"
-mkdir "$cpmm_kvantum"
+mkdir -p "$cpmm_kvantum/catppuccin-mocha-mauve"
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://raw.githubusercontent.com/catppuccin/kvantum/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.kvconfig
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://github.com/catppuccin/kvantum/raw/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.svg
 
