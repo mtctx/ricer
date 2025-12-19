@@ -100,17 +100,17 @@ if [[ $folder_path == ~* ]]; then
     folder_path="${folder_path/#\~/$HOME}"
 fi
 
-sudo rm -rf $folder_path
-mkdir -p $folder_path && cd $folder_path
+sudo rm -rf "$folder_path"
+mkdir -p "$folder_path"
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
-git clone https://github.com/mtctx/rice.git .
+git clone https://github.com/mtctx/rice.git "$folder_path"
 
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
-cpmm_kde="$cpmm_prefix KDE"
-cpmm_kvantum="$cpmm_prefix Kvantum"
-cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
+cpmm_kde="$folder_path/$cpmm_prefix KDE"
+cpmm_kvantum="$folder_path/$cpmm_prefix Kvantum"
+cpmm_whereismysddmtheme="$folder_path/$cpmm_prefix Where is my SDDM theme.conf"
 
 sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
 
@@ -146,7 +146,8 @@ kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
 # Konsole
 sudo mkdir -p ~/.local/share/konsole/
-curl -LO --output-dir ~/.local/share/konsole/ https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
+curl -LO -o konsole-catppuccin-mocha.colorscheme https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
+sudo ln -sf konsole-catppuccin-mocha.colorscheme ~/.local/share/konsole/catppuccin-mocha.colorscheme
 sudo ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
 
 # SDDM & Where is my SDDM theme? Setup
@@ -190,7 +191,14 @@ else
 fi
 
 # Fish
-sudo chsh $USER -s /bin/fish
+if ! sudo chsh "$USER" -s /usr/bin/fish; then
+    if grep -q "^$USER:" /etc/passwd | grep -q "/usr/bin/fish$"; then
+        echo "Shell is already set to Fish – continuing."
+    else
+        echo "Failed to change shell to Fish." >&2
+        exit 1
+    fi
+fi
 
 sudo mkdir -p ~/.config/fish/
 sudo rm -rf ~/.config/fish/config.fish
