@@ -120,12 +120,12 @@ sudo rm -rf "$cpmm_kde"
 git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
 echo "Running KDE Catppuccin installer..."
 
-sudo rm -rf /home/me/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
-sudo rm -rf /home/me/.local/share/plasma/look-and-feel
-sudo rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents
-sudo rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents/previews
-sudo rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
-sudo rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
+sudo rm -rf $HOME/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
+sudo rm -rf $HOME/.local/share/plasma/look-and-feel
+sudo rm -rf $HOME/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents
+sudo rm -rf $HOME/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents/previews
+sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
+sudo rm -rf $HOME/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
 
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
 sudo rm -rf ~/.icons
@@ -134,12 +134,12 @@ sudo ln -s ~/.local/share/icons/ ~/.icons
 # Kvantum
 echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
 sudo rm -rf "$cpmm_kvantum"
-sudo mkdir -p "$cpmm_kvantum/catppuccin-mocha-mauve"
+mkdir -p "$cpmm_kvantum/catppuccin-mocha-mauve"
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://raw.githubusercontent.com/catppuccin/kvantum/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.kvconfig
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://github.com/catppuccin/kvantum/raw/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.svg
 
 echo "Installing and applying Kvantum theme..."
-sudo mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 sudo ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 kvantummanager --set catppuccin-mocha-mauve
 kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
