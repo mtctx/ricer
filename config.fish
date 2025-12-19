@@ -15,7 +15,6 @@ bind \e\[B history-search-forward
 alias updatemirrors "sudo reflector -c Germany -c Switzerland -c Denmark -c Netherlands -c France -c Austria -c Luxembourg -c Belgium  --latest 80 --protocol http --protocol https --sort rate --save /etc/pacman.d/mirrorlist"
 alias rmrf "rm -rf"
 alias pacman "sudo pacman"
-alias cd z
 
 # Catppuccin Mocha colors
 set mocha_mauve "#cba6f7"
@@ -24,7 +23,7 @@ set mocha_blue "#89b4fa"
 set mocha_text "#cdd6f4"
 set mocha_peach "#fab387"
 
-zoxide init fish | source
+zoxide init fish --cmd cd | source
 
 function fish_prompt
     # Line 1: [user@host] [cwd] [git branch]
