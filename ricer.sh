@@ -291,7 +291,7 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     curl -Lo "$cpmm_sddm.zip" "https://github.com/catppuccin/sddm/releases/download/$latest_tag/catppuccin-mocha-mauve-sddm.zip"
     unzip "$cpmm_sddm.zip"
     sudo rm -rf "/usr/share/sddm/themes/catppuccin-mocha-mauve"
-    sudo mv -v catppuccin-mocha-mauve /usr/share/sddm/themes
+    sudo mv catppuccin-mocha-mauve /usr/share/sddm/themes
     rm -rf "$cpmm_sddm.zip"
 
     for file in /etc/sddm.conf.d/kde_settings.conf /etc/sddm.conf; do
