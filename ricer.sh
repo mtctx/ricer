@@ -206,18 +206,21 @@ sudo mkdir -p ~/.config/fish/
 sudo rm -rf ~/.config/fish/config.fish
 sudo ln -sf config.fish ~/.config/fish/config.fish
 
-echo "Starting fish"
-fish
+echo "Installing fisher and plugins"
+/usr/bin/fish -c '
+    # Install fisher if not present
+    if not type -q fisher
+        curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+        fisher install jorgebucaran/fisher
+    end
 
-echo "Installing plugins via fisher"
-fisher install catppuccin/fish
-fisher install reitzig/sdkman-for-fish
-fisher install jorgebucaran/autopair.fish
-fisher install patrickf1/fzf.fish
-fisher install joseluisq/gitnow
-
-echo "Exiting fish"
-exit
+    # Install your plugins
+    fisher install catppuccin/fish
+    fisher install reitzig/sdkman-for-fish
+    fisher install jorgebucaran/autopair.fish
+    fisher install patrickf1/fzf.fish
+    fisher install joseluisq/gitnow.fish
+'
 
 # Fastfetch
 echo "Copying Fastfetch config"
