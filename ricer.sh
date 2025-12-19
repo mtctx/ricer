@@ -100,8 +100,8 @@ if [[ $folder_path == ~* ]]; then
     folder_path="${folder_path/#\~/$HOME}"
 fi
 
-rm -rf $folder_path
-mkdir -p $folder_path && cd $folder_path
+sudo rm -rf $folder_path
+sudo mkdir -p $folder_path && cd $folder_path
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
 git clone https://github.com/mtctx/rice.git .
@@ -112,46 +112,46 @@ cpmm_kde="$cpmm_prefix KDE"
 cpmm_kvantum="$cpmm_prefix Kvantum"
 cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
 
-touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
+sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
 
 # KDE
 echo "Downloading KDE Catppuccin Mocha Mauve theme..."
-rm -rf "$cpmm_kde"
+sudo rm -rf "$cpmm_kde"
 git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
 echo "Running KDE Catppuccin installer..."
 
-rm -rf /home/me/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
-rm -rf /home/me/.local/share/plasma/look-and-feel
-rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents
-rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents/previews
-rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
-rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
+sudo rm -rf /home/me/.local/share/kpackage/generic/Catppuccin-Mocha-Mauve
+sudo rm -rf /home/me/.local/share/plasma/look-and-feel
+sudo rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents
+sudo rm -rf /home/me/.local/share/plasma/look-and-feel/Catppuccin-Mocha-Mauve/contents/previews
+sudo rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Mauve-Cursors
+sudo rm -rf /home/me/.local/share/icons/Catppuccin-Mocha-Dark-Cursors
 
 echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
-rm -rf ~/.icons
-ln -s ~/.local/share/icons/ ~/.icons
+sudo rm -rf ~/.icons
+sudo ln -s ~/.local/share/icons/ ~/.icons
 
 # Kvantum
 echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
-rm -rf "$cpmm_kvantum"
-mkdir -p "$cpmm_kvantum/catppuccin-mocha-mauve"
+sudo rm -rf "$cpmm_kvantum"
+sudo mkdir -p "$cpmm_kvantum/catppuccin-mocha-mauve"
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://raw.githubusercontent.com/catppuccin/kvantum/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.kvconfig
 curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://github.com/catppuccin/kvantum/raw/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.svg
 
 echo "Installing and applying Kvantum theme..."
-mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
-ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+sudo mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+sudo ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
 kvantummanager --set catppuccin-mocha-mauve
 kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
 
 # Konsole
-mkdir -p ~/.local/share/konsole/
+sudo mkdir -p ~/.local/share/konsole/
 curl -LO --output-dir ~/.local/share/konsole/ https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
-ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
+sudo ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
 
 # SDDM & Where is my SDDM theme? Setup
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
-    mkdir -p /usr/share/sddm/themes/
+    sudo mkdir -p /usr/share/sddm/themes/
     echo "Downloading Where is my SDDM theme?..."
     git clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
     echo "Installing Where is my SDDM theme..."
@@ -177,22 +177,22 @@ if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     echo "Downloading Where is my SDDM theme? Catppuccin Mocha Mauve theme..."
     curl -LO -o "$cpmm_whereismysddmtheme" https://raw.githubusercontent.com/catppuccin/where-is-my-sddm-theme/refs/heads/main/themes/catppuccin-mocha.conf
 
-    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
-    rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    sudo rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
 
     echo "Symlinking the theme to sddm theme directories..."
-    ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    ln -sf "$cpmm_whereismysddmtheme" ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    sudo ln -sf "$cpmm_whereismysddmtheme" ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
 else
     echo "SDDM is not installed or inactive -> Skipping Where is my SDDM theme? setup!"
 fi
 
 # Fish
-mkdir -p ~/.config/fish/
-rm -rf ~/.config/fish/config.fish
-ln -sf config.fish ~/.config/fish/config.fish
+sudo mkdir -p ~/.config/fish/
+sudo rm -rf ~/.config/fish/config.fish
+sudo ln -sf config.fish ~/.config/fish/config.fish
 
 fisher install catppuccin/fish
 fisher install reitzig/sdkman-for-fish
@@ -201,14 +201,14 @@ fisher install patrickf1/fzf.fish
 fisher install joseluisq/gitnow
 
 # Fastfetch
-mkdir -p ~/.config/fastfetch/
-rm -rf ~/.config/fastfetch/config.jsonc
-ln -sf fastfetch.jsonc ~/.config/fastfetch/config.jsonc
+sudo mkdir -p ~/.config/fastfetch/
+sudo rm -rf ~/.config/fastfetch/config.jsonc
+sudo ln -sf fastfetch.jsonc ~/.config/fastfetch/config.jsonc
 
 # Brave Setup
-mkdir -p /etc/brave/policies/managed/
+sudo mkdir -p /etc/brave/policies/managed/
 sudo rm -rf /etc/brave/policies/managed/policies.json
-ln -sf brave-policies.json /etc/brave/policies/managed/policies.json
+sudo ln -sf brave-policies.json /etc/brave/policies/managed/policies.json
 
 echo "Done setting up the rice.\nNote: This script cannot setup brave, discord, or the rest of applications and system settings used."
 echo "Updating the system a last time."
