@@ -101,7 +101,7 @@ if [[ $folder_path == ~* ]]; then
 fi
 
 sudo rm -rf $folder_path
-sudo mkdir -p $folder_path && cd $folder_path
+mkdir -p $folder_path && cd $folder_path
 
 # Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
 git clone https://github.com/mtctx/rice.git .
