@@ -78,6 +78,7 @@ trim_indent <<EOF
     Ricer will setup your KDE enviroment to use Catppuccin Mocha Mauve everywhere.
     What will Ricer setup?
     - KDE -> https://github.com/catppuccin/kde
+    - SDDM -> https://github.com/catppuccin/sddm
     - Konsole -> https://github.com/catppuccin/konsole & https://github.com/mtctx/rice/blob/main/konsole-fish.profile
     - Kvantum -> https://github.com/tsujan/Kvantum/tree/master/Kvantum & https://github.com/catppuccin/kvantum
     - Fish shell -> https://github.com/catppuccin/fish & https://github.com/mtctx/rice/blob/main/config.fish & https://github.com/jorgebucaran/fisher
@@ -104,25 +105,6 @@ while [[ $# -gt 0 ]]; do
             rice_directory="$2"
             shift
         ;;
-        --qt)
-            if [[ -n "$2" && "$2" != -* ]]; then
-                case "$2" in
-                    "5")
-                        export USE_QT5="true"
-                    ;;
-                    "6")
-                    ;;
-                    *)
-                        echo "Defaulting to QT 6 for Where is my SDDM theme?."
-                        echo "Version $2 is invalid. Accepted options: 5, 6"
-                    ;;
-                esac
-                shift
-            else
-                echo "Error: --qt requires a value" >&2
-                exit 1
-            fi
-        ;;
         --trustmeiamonarch)
             skip_os_check=true
             shift
@@ -133,7 +115,6 @@ while [[ $# -gt 0 ]]; do
                 
                 Options:
                 --dir: Set the directory to save all configs.
-                --qt: Set the QT Version, either 5 or 6. Malformed input will default to QT 6
                 --trustmeiamonarch: Skip the OS check (Use if you are on an different Arch-based distro and not on vanilla Arch or CachyOS)
 EOF
             exit 0
@@ -148,13 +129,6 @@ done
 
 echo
 echo "Storing all configs inside $rice_directory"
-
-if [[ $USE_QT5 == "true" ]]; then
-    echo "Using QT 5 for Where is my SDDM theme?."
-else
-    echo "Using QT 6 for Where is my SDDM theme?."
-fi
-
 echo
 
 declare os
@@ -232,8 +206,8 @@ clone https://github.com/mtctx/rice.git "$rice_directory"
 # Base Cattpuccin Setup
 cpmm_prefix="CPMM"
 cpmm_kde="$cpmm_prefix KDE"
+cpmm_sddm="$cpmm_prefix SDDM"
 cpmm_kvantum="$cpmm_prefix Kvantum"
-cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
 
 sudo touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve"
 
@@ -304,29 +278,23 @@ ln -sf "$rice_directory/konsole-catppuccin-mocha.colorscheme" $HOME/.local/share
 ln -sf "$rice_directory/konsole-fish.profile" $HOME/.local/share/konsole/fish.profile
 kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile "fish.profile"
 
-# SDDM & Where is my SDDM theme? Setup
+# SDDM Setup
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
+    yay -S --needed qt6-svg qt6-declarative qt5-quickcontrols2
+
     sudo mkdir -p /usr/share/sddm/themes/
-    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/
-    rm -rf "Where is my SDDM theme"
+    sudo rm -rf /usr/share/sddm/themes/catppuccin-mocha-mauve/
+    rm -rf "$cpmm_sddm"
 
-    echo "Downloading Where is my SDDM theme?..."
-    clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme" true
+    echo "Downloading Catppuccin SDDM theme..."
+    curl -Lo "$cpmm_sddm.zip" "https://github.com/catppuccin/sddm/releases/download/latest/catppuccin-mocha-mauve-sddm.zip"
+    unzip "$cpmm_sddm.zip" -d "$cpmm_sddm"
+    rm -rf "$cpmm_sddm.zip"
 
-    echo "Installing Where is my SDDM theme?..."
-    sudo "Where is my SDDM theme/install.sh" current
+    echo "Symlinking the theme to sddm theme directory..."
+    sudo ln -sf "$cpmm_sddm" /usr/share/sddm/themes/catppuccin-mocha-mauve
 
-    echo "Downloading Where is my SDDM theme? Catppuccin Mocha Mauve theme..."
-    curl -Lo "$cpmm_whereismysddmtheme" https://raw.githubusercontent.com/catppuccin/where-is-my-sddm-theme/refs/heads/main/themes/catppuccin-mocha.conf
-
-    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
-    sudo rm -rf $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
-    sudo rm -rf $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
-
-    echo "Symlinking the theme to sddm theme directories..."
-    sudo ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
-    ln -sf "$cpmm_whereismysddmtheme" $HOME/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    sed -i "s/Current=.*/Current=catppuccin-mocha-mauve/g" /etc/sddm.conf.d/kde_settings.conf:/etc/sddm.conf
 else
     echo "SDDM is not installed or inactive -> Skipping Where is my SDDM theme? setup!"
 fi
