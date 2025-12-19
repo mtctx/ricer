@@ -284,8 +284,8 @@ ln -sf "$rice_directory/konsole-fish.profile" $HOME/.local/share/konsole/fish.pr
 # SDDM & Where is my SDDM theme? Setup
 if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
     sudo mkdir -p /usr/share/sddm/themes/
+    sudo rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/
     rm -rf "Where is my SDDM theme"
-    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/
 
     echo "Downloading Where is my SDDM theme?..."
     clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme" true
