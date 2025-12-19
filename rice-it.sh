@@ -1,0 +1,201 @@
+#!/bin/bash
+
+set -e
+
+# Donwload Programs (Arch only)
+echo "Downloading Programs (Using sudo pacman -> Arch only)"
+
+arch="ARCH"
+cachyos="CACHYOS"
+declare os
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case "$ID" in
+        arch)
+            os="$arch"
+            echo "Using Vanilla Arch"
+            ;;
+        cachyos)
+            os="$cachyos"
+            ;;
+        *)
+            echo "This is neither Arch nor CachyOS (ID: $ID)"
+            exit 1
+            ;;
+    esac
+else
+    echo "/etc/os-release not found – unable to detect distribution!"
+    exit 1
+fi
+
+sudo -v
+
+# Update System
+echo "Updating system..."
+sudo pacman -Syyu --noconfirm
+
+# YAY Setup
+if [[ $os == $arch ]]; then
+    echo "Building YAY manually"
+    sudo pacman -S --needed git base-devel --noconfirm && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+elif [[ $os == $cachyos ]]; then
+    echo "Installing YAY via CachyOS AUR"
+    sudo pacman -S --needed git base-devel yay --noconfirm
+fi
+
+# Install packages
+declare ucode_package
+cpu_info=$(grep -m 1 'vendor_id' /proc/cpuinfo)
+
+if [[ "$cpu_info" == *"GenuineIntel"* ]]; then
+    echo "Intel CPU detected"
+    ucode_package="intel-ucode"
+elif [[ "$cpu_info" == *"AuthenticAMD"* ]]; then
+    echo "AMD CPU detected"
+    ucode_package="amd-ucode"
+else
+    echo "Unknown CPU vendor"
+    exit 1
+fi
+
+echo "Installing packages..."
+yay -S --needed --noconfirm ab-download-manager alsa-firmware alsa-utils $ucode_package ark awesome-terminal-fonts base bluez-hid2hci bluez-utils brave-bin btop btrfs-assistant cantarell-fonts cpupower dmraid dolphin duf efibootmgr efitools ethtool fastfetch ffmpegthumbnailer fisher fsarchiver glances gwenview haruna haveged hdparm hwdetect hwinfo inetutils jfsutils kate kcalc kde-gtk-config kdeplasma-addons kleopatra kvantum  kwallet-pam libgsf libva-nvidia-driver  libwnck3 linux-cachyos-headers linux-cachyos-nvidia-open logrotate lsscsi man-pages meld mtools mullvad-vpn nano-syntax-highlighting netctl networkmanager-openvpn nfs-utils noto-color-emoji-fontconfig ntp octopi pavucontrol plasma-browser-integration plasma-firewall plasma-systemmonitor plasma-thunderbolt poppler-glib prismlauncher pv qt6-wayland rebuild-detector reflector sddm-kcm sg3_utils sof-firmware spectacle systemd-boot-manager ttf-jetbrains-mono-nerd ttf-meslo-nerd ttf-opensans vi vlc-plugins-all xl2tpd xorg-xinit xorg-xinput xorg-xkill zip zoxide unzip
+
+# Setup folder
+
+folder_path="~/Rice"
+read -p "Enter the path to your desired folder (Default: $folder_path): " input_path
+folder_path=${input_path:-"$folder_path"}
+
+if [[ $folder_path == ~* ]]; then
+    folder_path="${folder_path/#\~/$HOME}"
+fi
+
+mkdir -p $folder_path && cd $folder_path
+
+# Contains config.fish, fastfetch.jsonc and brave-policies.json aswell as this script.
+git clone https://github.com/mtctx/rice.git .
+
+# Base Cattpuccin Setup
+cpmm_prefix="CPMM"
+cpmm_kde="$cpmm_prefix KDE"
+cpmm_kvantum="$cpmm_prefix Kvantum"
+cpmm_whereismysddmtheme="$cpmm_prefix Where is my SDDM theme.conf"
+
+touch ".$cpmm_prefix stands for Catppuccin Mocha Mauve.txt"
+
+# KDE
+echo "Downloading KDE Catppuccin Mocha Mauve theme..."
+rm -rf "$cpmm_kde"
+git clone https://github.com/catppuccin/kde.git "$cpmm_kde"
+echo "Running KDE Catppuccin installer..."
+echo -e "y\ny" | "$cpmm_kde/install.sh" 1 4 1
+ln -s ~/.local/share/icons/ ~/.icons
+
+# Kvantum
+echo "Downloading Kvantum Catppuccin Mocha Mauve theme..."
+rm -rf "$cpmm_kvantum"
+mkdir "$cpmm_kvantum"
+curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://raw.githubusercontent.com/catppuccin/kvantum/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.kvconfig
+curl -LO --output-dir "$cpmm_kvantum/catppuccin-mocha-mauve" https://github.com/catppuccin/kvantum/raw/refs/heads/main/themes/catppuccin-mocha-mauve/catppuccin-mocha-mauve.svg
+
+echo "Installing and applying Kvantum theme..."
+mkdir -p "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+ln -sf "$cpmm_kvantum/catppuccin-mocha-mauve" "$HOME/.config/Kvantum/catppuccin-mocha-mauve"
+kvantummanager --set catppuccin-mocha-mauve
+kwriteconfig5 --file kdeglobals --group KDE --key widgetStyle kvantum-dark
+
+# Konsole
+mkdir -p ~/.local/share/konsole/
+curl -LO --output-dir ~/.local/share/konsole/ https://raw.githubusercontent.com/catppuccin/konsole/refs/heads/main/themes/catppuccin-mocha.colorscheme
+ln -sf konsole-fish.profile ~/.local/share/konsole/fish.profile
+
+# SDDM & Where is my SDDM theme? Setup
+if sudo pacman -Q sddm &>/dev/null && systemctl is-active sddm; then
+    mkdir -p /usr/share/sddm/themes/
+    echo "Downloading Where is my SDDM theme?..."
+    git clone https://github.com/stepanzubkov/where-is-my-sddm-theme.git "Where is my SDDM theme"
+    echo "Installing Where is my SDDM theme..."
+    read -p "Which QT Version are you using? 5 or 6: " qt_version
+    qt_version=${qt_version:-"6"}
+    case "$qt_version" in
+        5)
+            export USE_QT5=true
+            echo "Using QT5 version of Where is my SDDM theme?..."
+            ;;
+        6)
+            unset USE_QT5
+            echo "Using QT6 version of Where is my SDDM theme?..."
+            ;;
+        *)
+            echo "Malformed input, defaulting to QT6"
+            qt_version="6"
+            ;;
+    esac
+
+    sudo "Where is my SDDM theme/install.sh" current
+
+    echo "Downloading Where is my SDDM theme? Catppuccin Mocha Mauve theme..."
+    curl -LO -o "$cpmm_whereismysddmtheme" https://raw.githubusercontent.com/catppuccin/where-is-my-sddm-theme/refs/heads/main/themes/catppuccin-mocha.conf
+
+    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    rm -rf /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+    rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    rm -rf ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user
+
+    echo "Symlinking the theme to sddm theme directories..."
+    ln -sf "$cpmm_whereismysddmtheme" /usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+    ln -sf "$cpmm_whereismysddmtheme" ~/.local/share/sddm/themes/where_is_my_sddm_theme/theme.conf
+else
+    echo "SDDM is not installed or inactive -> Skipping Where is my SDDM theme? setup!"
+fi
+
+# Fish
+mkdir -p ~/.config/fish/
+rm -rf ~/.config/fish/config.fish
+ln -sf config.fish ~/.config/fish/config.fish
+
+fisher install catppuccin/fish
+fisher install reitzig/sdkman-for-fish
+fisher install jorgebucaran/autopair.fish
+fisher install patrickf1/fzf.fish
+fisher install joseluisq/gitnow
+
+# Fastfetch
+mkdir -p ~/.config/fastfetch/
+rm -rf ~/.config/fastfetch/config.jsonc
+ln -sf fastfetch.jsonc ~/.config/fastfetch/config.jsonc
+
+# Brave Setup
+mkdir -p /etc/brave/policies/managed/
+sudo rm -rf /etc/brave/policies/managed/policies.json
+ln -sf brave-policies.json /etc/brave/policies/managed/policies.json
+
+echo "Done setting up the rice.\nNote: This script cannot setup brave, discord, or the rest of applications and system settings used."
+echo "Updating the system a last time."
+
+declare reboot_after_update
+while true; do
+    read -p "Do you want to reboot after the update? [y/N]: " input_reboot_after_update
+    case "${input_reboot_after_update:-N}" in
+        [Yy]* )
+            reboot_after_update="true"
+            break
+        ;;
+        [Nn]* )
+            reboot_after_update="false"
+            echo "You need to logout or reboot for everything to apply correctly!"
+            break
+        ;;
+        * )
+            echo "Please answer y or n."
+        ;;
+    esac
+done
+
+if [[ $reboot_after_update == "true" ]]; then
+    yay -Syyu --noconfirm && reboot
+else
+    yay -Syyu --noconfirm
+fi
