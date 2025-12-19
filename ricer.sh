@@ -4,8 +4,20 @@ set -e
 
 echo """
     Welcome to Ricer by mtctx (https://github.com/mtctx/rice)
-    This shell script is e
+    This shell script is exclusively for Arch-based Distros.
+    Officially supported are CachyOS and Vanilla Arch.
+    If you are on a different Arch-based Distro run this script with -f or --force.
+
+    Ricer will setup your KDE enviroment to use Catppuccin Mocha Mauve everywhere.
+    What will Ricer setup?
+    - KDE -> https://github.com/catppuccin/kde
+    - Konsole -> https://github.com/catppuccin/konsole & https://github.com/mtctx/rice/blob/main/konsole-fish.profile
+    - Kvantum -> https://github.com/tsujan/Kvantum/tree/master/Kvantum & https://github.com/catppuccin/kvantum
+    - Fish shell -> https://github.com/mtctx/rice/blob/main/config.fish
+    - Fastfetch -> https://github.com/mtctx/rice/blob/main/fastfetch.jsonc
 """
+
+sleep 1.25s
 
 arch="ARCH"
 cachyos="CACHYOS"
