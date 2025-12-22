@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ricer Config",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the configuration"
+    },
+    "description": {
+      "type": "string",
+      "description": "The description of the configuration"
+    },
+    "configs": {
+      "type": "array",
+      "description": "List of configuration files",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path"
+          },
+          "symlinkLocation": {
+            "type": "string",
+            "description": "Location of the symlink"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the file"
+          },
+          "actions": {
+            "type": "array",
+            "description": "List of actions for the file",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "path",
+          "symlinkLocation",
+          "content",
+          "actions"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "configs"
+  ],
+  "additionalProperties": false
+}
