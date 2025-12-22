@@ -58,8 +58,7 @@
         "path",
         "symlinkLocation",
         "deleteFiles",
-        "content",
-        "actions"
+        "content"
       ],
       "additionalProperties": false
     },

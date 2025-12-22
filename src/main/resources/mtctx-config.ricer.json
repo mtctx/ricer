@@ -6,8 +6,11 @@
     {
       "path": "./configs/brave-policies.json",
       "symlinkLocation": "/etc/brave/policies/managed/policies.json",
-      "content": "",
-      "actions": []
+      "content": [
+        "{\n    \"BraveRewardsDisabled\": true,\n    \"BraveWalletDisabled\": true,\n    \"BraveVPNDisabled\": 1,\n    \"BraveAIChatEnabled\": false,\n    \"NewTabPageLocation\": \"https://search.brave.com\",\n    \"TorDisabled\": true\n}"
+      ],
+      "deleteFiles": [],
+      "actions":
     }
   ]
 }
