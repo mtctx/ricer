@@ -47,8 +47,11 @@
           }
         },
         "content": {
-          "type": "string",
-          "description": "The content of the file"
+          "type": "array",
+          "description": "The content of the file",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

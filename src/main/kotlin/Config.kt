@@ -9,7 +9,7 @@ data class Config(
         val path: String,
         val symlinkLocation: String,
         val deleteFiles: List<DeleteLocation>,
-        val content: String,
+        val content: List<String>,
     ) {
         enum class DeleteLocation {
             TARGET_PARENT_LOCATION,

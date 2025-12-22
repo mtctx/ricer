@@ -4,6 +4,9 @@
   "description": "mtctx's personal configuration",
   "configs": [
     {
+      "path": "./configs/brave-policies.json",
+      "symlinkLocation": "/etc/brave/policies/managed/policies.json",
+      "content": "",
       "actions": []
     }
   ]
