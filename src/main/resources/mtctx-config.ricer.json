@@ -2,5 +2,9 @@
   "$schema": "https://raw.githubusercontent.com/mtctx/ricer/refs/heads/master/ricer-schema.json",
   "name": "mtctx's Config",
   "description": "mtctx's personal configuration",
-  "configs": []
+  "configs": [
+    {
+      "actions": []
+    }
+  ]
 }

@@ -49,13 +49,6 @@
         "content": {
           "type": "string",
           "description": "The content of the file"
-        },
-        "actions": {
-          "type": "array",
-          "description": "List of actions to perform",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
