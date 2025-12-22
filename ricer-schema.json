@@ -1,6 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Ricer Config",
+  "$id": "https://example.com/config.schema.json",
+  "title": "Config",
+  "description": "Root configuration object",
   "type": "object",
   "properties": {
     "name": {
@@ -9,41 +11,13 @@
     },
     "description": {
       "type": "string",
-      "description": "The description of the configuration"
+      "description": "A description of the configuration"
     },
     "configs": {
       "type": "array",
-      "description": "List of configuration files",
+      "description": "List of file configurations",
       "items": {
-        "type": "object",
-        "properties": {
-          "path": {
-            "type": "string",
-            "description": "File path"
-          },
-          "symlinkLocation": {
-            "type": "string",
-            "description": "Location of the symlink"
-          },
-          "content": {
-            "type": "string",
-            "description": "Content of the file"
-          },
-          "actions": {
-            "type": "array",
-            "description": "List of actions for the file",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "path",
-          "symlinkLocation",
-          "content",
-          "actions"
-        ],
-        "additionalProperties": false
+        "$ref": "#/$defs/File"
       }
     }
   },
@@ -52,5 +26,56 @@
     "description",
     "configs"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "File": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The target path for the file"
+        },
+        "symlinkLocation": {
+          "type": "string",
+          "description": "The location where the symlink should be created"
+        },
+        "deleteFiles": {
+          "type": "array",
+          "description": "List of locations to delete before applying the file",
+          "items": {
+            "$ref": "#/$defs/DeleteLocation"
+          }
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the file"
+        },
+        "actions": {
+          "type": "array",
+          "description": "List of actions to perform",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "path",
+        "symlinkLocation",
+        "deleteFiles",
+        "content",
+        "actions"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteLocation": {
+      "type": "string",
+      "enum": [
+        "TARGET_PARENT_LOCATION",
+        "TARGET_LOCATION",
+        "SYMLINK_PARENT_LOCATION",
+        "SYMLINK_LOCATION"
+      ],
+      "description": "Enum specifying which location to delete"
+    }
+  }
 }
