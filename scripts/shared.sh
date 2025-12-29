@@ -1,19 +1,22 @@
 set -e
 
 exit_dir_on_error() {
-    cd $HOME || true
+    cd "$HOME" || true
 }
 
 trap exit_dir_on_error ERR
 
 ############
-
-export rice_directory=$(cat "./data/rice_dir.txt")
-export os=$(cat "./data/os.txt")
-
-export cpmm_kde="$rice_directory/catppuccin/kde"
-export cpmm_sddm="$rice_directory/catppuccin/sddm"
-export cpmm_kvantum="$rice_directory/catppuccin/kvantum"
+export rice_directory="$1"
+cpmm_kde() {
+    printf '%s/catppuccin/kde' "$rice_directory"
+}
+cpmm_sddm() {
+    printf '%s/catppuccin/sddm' "$rice_directory"
+}
+cpmm_kvantum() {
+    printf '%s/catppuccin/kvantum' "$rice_directory"
+}
 
 ############
 
@@ -21,9 +24,9 @@ check_var_empty() {
     local var="$1"
 
     if [[ $# -lt 1 || -z "$var" ]]; then
-        echo "true"
+        printf "true"
     else
-        echo "false"
+        printf "false"
     fi
 }
 
@@ -31,7 +34,7 @@ parse_path() {
     local path="$1"
 
     var_empty=$(check_var_empty "$path")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No path provided or empty string!"
         exit 1
     fi
@@ -42,14 +45,14 @@ parse_path() {
 
     path=${path// /\\}
 
-    echo $path
+    printf '%s' "$path"
 }
 
 is_directory_or_file() {
     local path="$1"
 
     var_empty=$(check_var_empty "$path")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No path provided or empty string!"
         exit 1
     fi
@@ -57,11 +60,11 @@ is_directory_or_file() {
     path=$(parse_path "$path")
 
     if [[ -f $path || $path == *.* ]]; then
-        echo "file"
+        printf "file"
     elif [[ -d $path ]]; then
-        echo "directory"
+        printf "directory"
     else
-        echo "directory"
+        printf "directory"
     fi
 }
 
@@ -71,12 +74,12 @@ clone() {
     local remove="$3"
 
     var_empty=$(check_var_empty "$repo")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No repo url provided or empty string!"
         exit 1
     fi
     var_empty=$(check_var_empty "$out")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No output directory provided or empty string!"
         exit 1
     fi
@@ -97,10 +100,10 @@ clone() {
 safe_curl() {
     local target_path="$1"
     local url="$2"
-    local simlink_location="$3"
+    local symlink_location="$3"
 
     var_empty=$(check_var_empty "$target_path")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No target path provided or empty string!"
         exit 1
     else
@@ -108,26 +111,26 @@ safe_curl() {
     fi
 
     var_empty=$(check_var_empty "$url")
-    if [[ var_empty == "true" ]]; then
+    if [[ $var_empty == "true" ]]; then
         echo "No url provided or empty string!"
         exit 1
     fi
 
-    sudo rm -rf $target_path
+    sudo rm -rf "$target_path"
 
-    dir_or_file=$(is_directory_or_file $target_path)
-    if [[ dir_or_file == "file" ]]; then
-        curl -Lo $target_path $url
-    elif [[ dir_or_file == "directory" ]]; then
-        curl -LO --output-dir $target_path $url
+    dir_or_file=$(is_directory_or_file "$target_path")
+    if [[ $dir_or_file == "file" ]]; then
+        curl -Lo "$target_path" "$url"
+    elif [[ $dir_or_file == "directory" ]]; then
+        curl -LO --output-dir "$target_path" "$url"
     else
         exit 1
     fi
 
-    var_empty=$(check_var_empty "$simlink_location")
-    if [[ var_empty == "false" ]]; then
-        simlink_location=$(parse_path "$simlink_location")
-        ln -sf $target_path $simlink_location
+    var_empty=$(check_var_empty "$symlink_location")
+    if [[ $var_empty == "false" ]]; then
+        symlink_location=$(parse_path "$symlink_location")
+        ln -sf "$target_path" "$symlink_location"
     fi
 }
 

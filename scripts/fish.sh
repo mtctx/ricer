@@ -1,4 +1,4 @@
-source "./shared.sh"
+source "$1/scripts/shared.sh" "$1"
 
 if ! sudo chsh "$USER" -s /usr/bin/fish; then
     if grep -q "^$USER:" /etc/passwd | grep -q "/usr/bin/fish$"; then
@@ -10,9 +10,9 @@ if ! sudo chsh "$USER" -s /usr/bin/fish; then
 fi
 
 echo "Copying fish config"
-sudo rm -rf $HOME/.config/fish
-sudo mkdir -p $HOME/.config/fish/
-ln -sf "$rice_directory/configs/config.fish" $HOME/.config/fish/config.fish
+sudo rm -rf "$HOME/.config/fish"
+sudo mkdir -p "$HOME/.config/fish/"
+ln -sf "$rice_directory/configs/config.fish" "$HOME/.config/fish/config.fish"
 
 echo "Installing fisher and plugins"
 /usr/bin/fish -c '

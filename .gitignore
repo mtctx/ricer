@@ -3,5 +3,7 @@
 !.gitignore
 !configs
 !configs/*
+configs/konsole-catppuccin-mocha.colorscheme
 !scripts
 !scripts/*
+!ricer.sh

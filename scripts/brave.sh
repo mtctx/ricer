@@ -1,4 +1,4 @@
-source "./shared.sh"
+source "$1/scripts/shared.sh" "$1"
 
 echo "Copying Brave policies"
 sudo mkdir -p /etc/brave/policies/managed/
