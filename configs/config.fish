@@ -25,6 +25,24 @@ set mocha_peach "#fab387"
 
 zoxide init fish --cmd cd | source
 
+# Check if SSH_AUTH_SOCK is empty
+if test -z "$SSH_AUTH_SOCK"
+    # Check for a currently running instance of ssh-agent
+    set RUNNING_AGENT (ps -ax | grep 'ssh-agent -s' | grep -v grep | wc -l | tr -d '[:space:]')
+
+    if test "$RUNNING_AGENT" = "0"
+        # Launch a new instance of the agent
+        ssh-agent -s > $HOME/.ssh/ssh-agent
+    end
+
+    # Source the ssh-agent variables
+    source $HOME/.ssh/ssh-agent
+
+    # Add your SSH key (suppress errors)
+    ssh-add $HOME/.ssh/<your ssh key> ^/dev/null
+end
+
+
 function fish_prompt
     # Line 1: [user@host] [cwd] [git branch]
     set_color $mocha_mauve
